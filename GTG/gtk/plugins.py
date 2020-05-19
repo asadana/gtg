@@ -117,7 +117,7 @@ def plugin_markup(column, cell, store, iterator, self):
                       store.get_value(iterator, PLUGINS_COL_ACTIVATABLE))
 
 
-class PluginsDialog():
+class PluginsDialog:
     """ Dialog for Plugins configuration """
 
     def __init__(self, requester):

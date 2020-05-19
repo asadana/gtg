@@ -26,19 +26,8 @@ from GTG.core.borg import Borg
 from GTG.core.logger import log
 
 
-class Plugin():
+class Plugin:
     """A class to represent a plugin."""
-
-    # A reference to an instance of the plugin class
-    instance = None
-    # True if the plugin has been enabled by the user.
-    enabled = False
-    # True if some error prevents the plugin from being activated.
-    error = False
-    # True if the plugin is actually loaded and running.
-    _active = False
-    missing_modules = []
-    missing_dbus = []
 
     def __init__(self, info, module_paths):
         """Initialize the Plugin using a ConfigParser."""
@@ -52,6 +41,18 @@ class Plugin():
             'module_depends': 'dependencies',
             'dbus_depends': 'dbus-dependencies',
         }
+
+        # A reference to an instance of the plugin class
+        self.instance = None
+        # True if the plugin has been enabled by the user.
+        self.enabled = False
+        # True if some error prevents the plugin from being activated.
+        self.error = False
+        # True if the plugin is actually loaded and running.
+        self._active = False
+        missing_modules = []
+        self.missing_dbus = []
+
         for attr, field in info_fields.items():
             try:
                 setattr(self, attr, info[field])
@@ -69,18 +70,17 @@ class Plugin():
             self.dbus_depends = [self.dbus_depends]
         self._load_module(module_paths)
 
-    # 'active' property
-    def _get_active(self):
+    @property
+    def active(self):
         return self._active
 
-    def _set_active(self, value):
+    @active.setter
+    def active(self, value):
         if value:
             self.instance = self.plugin_class()
         else:
             self.instance = None
         self._active = value
-
-    active = property(_get_active, _set_active)
 
     def _check_module_depends(self):
         """Check the availability of modules this plugin depends on."""
@@ -88,14 +88,14 @@ class Plugin():
         for mod_name in self.module_depends:
             try:
                 __import__(mod_name)
-            except:
+            except ImportError:
                 self.missing_modules.append(mod_name)
                 self.error = True
 
     def is_configurable(self):
         """Since some plugins don't have a is_configurable() method."""
-        return self.instance and hasattr(self.instance, 'is_configurable') and\
-            self.instance.is_configurable()
+        return self.instance and hasattr(self.instance,
+                                         'is_configurable') and self.instance.is_configurable()
 
     def _load_module(self, module_paths):
         """Load the module containing this plugin."""
@@ -177,6 +177,7 @@ class PluginEngine(Borg):
                     (kind_of_plugins == "inactive" and not plugin.active) or
                     (kind_of_plugins == "enabled" and plugin.enabled) or
                     (kind_of_plugins == "disabled" and not plugin.enabled))
+
         return list(filter(filter_fun, all_plugins))
 
     def register_api(self, api):
@@ -246,7 +247,7 @@ class PluginEngine(Borg):
             if hasattr(plugin.instance, 'onTaskClosed'):
                 plugin.instance.onTaskClosed(plugin_api)
 
-# FIXME: What are these for? must check someday! (invernizzi)
+    # FIXME: What are these for? must check someday! (invernizzi)
     def recheck_plugins(self, plugin_apis):
         """Check plugins to make sure their states are consistent.
 

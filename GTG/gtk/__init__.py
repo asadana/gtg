@@ -21,7 +21,7 @@
 import os
 
 
-class ViewConfig():
+class ViewConfig:
     current_rep = os.path.dirname(os.path.abspath(__file__))
     data = os.path.join(current_rep, 'data')
     DELETE_UI_FILE = os.path.join(data, "deletion.ui")
