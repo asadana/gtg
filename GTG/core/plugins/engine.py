@@ -193,9 +193,11 @@ class PluginEngine(Borg):
     def remove_api(self, api):
         self.plugin_apis.remove(api)
 
-    def activate_plugins(self, plugins=[]):
+    def activate_plugins(self, plugins=None):
         """Activate plugins."""
-        assert(isinstance(plugins, list))
+        if plugins is None:
+            plugins = []
+        assert (isinstance(plugins, list))
         if not plugins:
             plugins = self.get_plugins("inactive")
         for plugin in plugins:
@@ -214,9 +216,11 @@ class PluginEngine(Borg):
                         if tv:
                             tv.modified(refresheditor=False)
 
-    def deactivate_plugins(self, plugins=[]):
+    def deactivate_plugins(self, plugins=None):
         """Deactivate plugins."""
-        assert(isinstance(plugins, list))
+        if plugins is None:
+            plugins = []
+        assert (isinstance(plugins, list))
         if not plugins:
             plugins = self.get_plugins("active")
         for plugin in plugins:
